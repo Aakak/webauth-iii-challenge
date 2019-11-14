@@ -3,12 +3,14 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken"); //1:  npm i jsonwebtoken
 
 const Users = require("../users/users-model.js");
+const { validateUser } = require("../users/users-helpers.js");
 
+const secrets = require('../config/secrets.js'); // <<<<<<<<
 
 
 router.post("/register", (req, res) => {
   let user = req.body;
-const validateResult = validateUser(user);
+  const validateResult = validateUser(user);
 
   if (validateResult.isSuccessful === true) {
     const hash = bcrypt.hashSync(user.password, 10); // 2 ^ n
@@ -19,6 +21,7 @@ const validateResult = validateUser(user);
         res.status(201).json(saved);
       })
       .catch(error => {
+          console.log(error)
         res.status(500).json(error);
       });
   } else {
@@ -49,6 +52,7 @@ router.post("/login", (req, res) => {
       }
     })
     .catch(error => {
+        console.log(error)
       res.status(500).json(error);
     });
 });
@@ -57,11 +61,11 @@ router.post("/login", (req, res) => {
 function getJwtToken(username) {
   const payload = {
     username,
-    role: "student" 
+    role: "student" // this will probably come from the database
   };
 
-  const secret = process.env.JWT_SECRET || "is it secret, is it safe?";
-
+  const secret = secrets.jwtSecret;
+  console.log(secret);
   const options = {
     expiresIn: "1d"
   };

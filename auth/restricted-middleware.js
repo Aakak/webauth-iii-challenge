@@ -1,22 +1,25 @@
-const jwt = require("jsonwebtoken"); //1:  npm i jsonwebtoken
+const jwt = require('jsonwebtoken');
+
+const secrets = require('../config/secrets.js'); // <<<<<<<<
 
 module.exports = (req, res, next) => {
   const token = req.headers.authorization;
-
+    console.log(token)
   if (token) {
-    const secret = process.env.JWT_SECRET || "is it secret, is it safe?";
-
-    // check that the token is valid
-    jwt.verify(token, secret, (err, decodedToken) => {
+      console.log(secrets.jwtSecret)
+    jwt.verify(token, secrets.jwtSecret, (err, decodedToken) => {
       if (err) {
-        // bad panda, token has been tampered with
-        res.status(401).json({ message: "Invalid Credentials" });
+          console.log(err)
+        // token expired or is invalid
+        res.status(401).json({ message: 'You shall not pass!' });
       } else {
-        req.decodedJwt = decodedToken;
+        // token is goooooooood
+        console.log(decodedToken)
+        req.user = { username: decodedToken.username };
         next();
       }
     });
   } else {
-    res.status(400).json({ message: "No credentials provided" });
+    res.status(400).json({ message: 'no credentials provided' });
   }
 };
